@@ -10,11 +10,37 @@ export class ArticleService {
     private readonly articleModel: Model<ArticleDocument>,
   ) {}
 
+  // async findAll(
+  //   filter?: object,
+  //   options: QueryOptions = { limit: 30 },
+  // ): Promise<Article[]> {
+  //   return this.articleModel.find(filter ?? {}, null, options).exec();
+  // }
+
   async findAll(
-    filter?: object,
-    options: QueryOptions = { limit: 30 },
-  ): Promise<Article[]> {
-    return this.articleModel.find(filter ?? {}, null, options).exec();
+    filter: { keyword?: string } = {}, 
+    options: QueryOptions = { limit: 5 }
+    ): Promise<Article[]> {
+    try {
+      let query = this.articleModel.find();
+      console.log('filter:', filter, 'options:', options);
+      if (filter.keyword) {
+        query = query.where({
+          $or: [
+            { title: { $regex: filter.keyword, $options: 'i' } },
+            { outline: { $regex: filter.keyword, $options: 'i' } },
+          ],
+        });
+      }
+
+      if (options.limit) {
+        query = query.limit(options.limit);
+      }
+
+      return await query.sort({ _id: -1 }).exec();
+    } catch (error) {
+      throw new Error('Failed to fetch articles');
+    }
   }
 
   async findOneById(id: Types.ObjectId): Promise<Article> {
