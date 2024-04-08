@@ -27,13 +27,15 @@ function setupSwagger(app: INestApplication) {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.setGlobalPrefix('/api');   // Set global prefix to '/api'
+
   setupSwagger(app);
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port', 3000);
-  const baseUrl = configService.get<string>('baseUrl', '/api');
+  // const baseUrl = configService.get<string>('baseUrl', '/api');
 
-  app.setGlobalPrefix(baseUrl);
+  // app.setGlobalPrefix(baseUrl);
   app.enableVersioning({ type: VersioningType.URI });
   await app.listen(port);
 }
